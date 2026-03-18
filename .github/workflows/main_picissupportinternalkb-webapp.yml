@@ -34,7 +34,7 @@ jobs:
           context: .
           push: true
           tags: picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_4AEC0BA4812A4A5FAE5486DD3EBF8799 }}/picissupportinternalkb-webapp:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./WebApp.Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
