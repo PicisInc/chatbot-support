@@ -57,7 +57,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'TESTFRONTEND-webapp3'
+          app-name: 'PicisSupportChatbotExternal'
           slot-name: 'Production'
           images: 'picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_6D75C783B55D4E258CA939FA192A1DE8 }}/chatbot-support:${{ github.sha }}'
           
