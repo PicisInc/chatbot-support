@@ -34,7 +34,7 @@ jobs:
           context: .
           push: true
           tags: picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_6D75C783B55D4E258CA939FA192A1DE8 }}/chatbot-support:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./WebApp.Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
