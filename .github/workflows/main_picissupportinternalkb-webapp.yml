@@ -41,6 +41,10 @@ jobs:
     
     needs: build
     
+    environment:
+      name: Internal
+      url: https://picissupportinternalkb-webapp.azurewebsites.net/
+    
     steps:
       
       - name: Deploy to Azure Web App
