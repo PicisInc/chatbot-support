@@ -24,7 +24,7 @@ jobs:
       - name: Log in to container registry
         uses: docker/login-action@v2
         with:
-          registry: picisregistry.azurecr.io/
+          registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_4AEC0BA4812A4A5FAE5486DD3EBF8799 }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_F7B054AA5CF7458EB350FA108CC38ED0 }}
 
@@ -33,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_4AEC0BA4812A4A5FAE5486DD3EBF8799 }}/picissupportinternalkb-webapp:${{ github.sha }}
+          tags: ${{ secrets.REGISTRY_URL }}/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_4AEC0BA4812A4A5FAE5486DD3EBF8799 }}/${{ secrets.APP_NAME }}:${{ github.sha }}
           file: ./WebApp.Dockerfile
 
   deploy:
@@ -43,7 +43,7 @@ jobs:
     
     environment:
       name: Internal
-      url: https://picissupportinternalkb-webapp.azurewebsites.net/
+      url: ${{ vars.APP_URL }}
     
     steps:
       
@@ -51,7 +51,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'picissupportinternalkb-webapp'
+          app-name: ${{ secrets.APP_NAME }}
           slot-name: 'Production'
-          images: 'picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_4AEC0BA4812A4A5FAE5486DD3EBF8799 }}/picissupportinternalkb-webapp:${{ github.sha }}'
+          images: '${{ secrets.REGISTRY_URL }}/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_4AEC0BA4812A4A5FAE5486DD3EBF8799 }}/${{ secrets.APP_NAME }}:${{ github.sha }}'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BCE8F7C1163545A9B33C2ADEB8E8C8C2 }}
