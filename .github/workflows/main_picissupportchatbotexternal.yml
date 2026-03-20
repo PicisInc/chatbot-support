@@ -38,24 +38,14 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
 
     needs: build
 
     environment:
       name: External
       url: https://picissupportchatbotexternal.azurewebsites.net/
-    
+
     steps:
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_52AEBEAFF53746AFBE99B2098E613636 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_925F327C7ED44FCE8E6E1EE32C7CB705 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DCBB3EBB4F5D47C2A86ED11654965576 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -64,4 +54,4 @@ jobs:
           app-name: 'picissupportchatbotexternal'
           slot-name: 'Production'
           images: 'picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC38B488579F4817ADA0601CB7A73CAE }}/picissupportchatbotexternal:${{ github.sha }}'
-          
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_EXTERNAL }}
