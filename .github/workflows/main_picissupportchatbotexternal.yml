@@ -24,7 +24,7 @@ jobs:
       - name: Log in to container registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ secrets.REGISTRY_URL }}
+          registry: picisregistry.azurecr.io/
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC38B488579F4817ADA0601CB7A73CAE }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_54540DBECCCC4EEFB57A058D5DE8EC47 }}
 
@@ -33,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.REGISTRY_URL }}/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC38B488579F4817ADA0601CB7A73CAE }}/${{ secrets.APP_NAME }}:${{ github.sha }}
+          tags: picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC38B488579F4817ADA0601CB7A73CAE }}/picissupportchatbotexternal:${{ github.sha }}
           file: ./WebApp.Dockerfile
 
   deploy:
@@ -46,7 +46,7 @@ jobs:
 
     environment:
       name: External
-      url: ${{ vars.APP_URL }}
+      url: https://picissupportchatbotexternal.azurewebsites.net/
     
     steps:
       
@@ -61,7 +61,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ secrets.APP_NAME }}
+          app-name: 'picissupportchatbotexternal'
           slot-name: 'Production'
-          images: '${{ secrets.REGISTRY_URL }}/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC38B488579F4817ADA0601CB7A73CAE }}/${{ secrets.APP_NAME }}:${{ github.sha }}'
+          images: 'picisregistry.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC38B488579F4817ADA0601CB7A73CAE }}/picissupportchatbotexternal:${{ github.sha }}'
           

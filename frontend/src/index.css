@@ -127,7 +127,7 @@ body {
 }
 
 html {
-  background: var(--picis-red-600);
+  background: var(--picis-grey-300);
   /* background-image: linear-gradient(-36deg, var(--picis-blue-900) 26%, var(--picis-blue-800) 75%); */
   font-family:
     'Segoe UI',
