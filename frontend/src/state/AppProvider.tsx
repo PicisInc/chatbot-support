@@ -30,6 +30,7 @@ export interface AppState {
   feedbackState: { [answerId: string]: Feedback.Neutral | Feedback.Positive | Feedback.Negative }
   isLoading: boolean;
   answerExecResult: { [answerId: string]: [] }
+  externalUserId: string | null
 }
 
 export type Action =
@@ -51,6 +52,9 @@ export type Action =
   }
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
   | { type: 'SET_ANSWER_EXEC_RESULT'; payload: { answerId: string, exec_result: [] } }
+  | { type: 'SET_EXTERNAL_USER_ID'; payload: string | null }
+
+const GUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const initialState: AppState = {
   isChatHistoryOpen: false,
@@ -66,6 +70,7 @@ const initialState: AppState = {
   feedbackState: {},
   isLoading: true,
   answerExecResult: {},
+  externalUserId: null,
 }
 
 export const AppStateContext = createContext<
@@ -82,6 +87,25 @@ type AppStateProviderProps = {
 
 export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(appStateReducer, initialState)
+
+  // Read Dynamics user GUID from URL on startup (?user=<guid>)
+  useEffect(() => {
+    const params = new URLSearchParams(globalThis.location.search)
+    const userParam = params.get('user')
+    if (userParam && GUID_REGEX.test(userParam)) {
+      sessionStorage.setItem('externalUserId', userParam)
+      dispatch({ type: 'SET_EXTERNAL_USER_ID', payload: userParam })
+      console.log('[ExternalUser] User ID captured from URL:', userParam)
+    } else {
+      const stored = sessionStorage.getItem('externalUserId')
+      if (stored && GUID_REGEX.test(stored)) {
+        dispatch({ type: 'SET_EXTERNAL_USER_ID', payload: stored })
+        console.log('[ExternalUser] User ID restored from session:', stored)
+      } else if (userParam) {
+        console.warn('[ExternalUser] Invalid user GUID in URL parameter, ignoring:', userParam)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     // Check for cosmosdb config and fetch initial data here

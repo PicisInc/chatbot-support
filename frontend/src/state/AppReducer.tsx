@@ -74,6 +74,8 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
           [action.payload.answerId]: action.payload.feedback
         }
       }
+    case 'SET_EXTERNAL_USER_ID':
+      return { ...state, externalUserId: action.payload }
     case 'SET_ANSWER_EXEC_RESULT':
       return {
         ...state,

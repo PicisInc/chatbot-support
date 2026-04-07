@@ -2,11 +2,24 @@ import { chatHistorySampleData } from '../constants/chatHistory'
 
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
+const GUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// Returns the external user header when a valid GUID is stored in sessionStorage.
+// The header is read by the backend to identify the Dynamics user.
+function getExternalUserHeaders(): Record<string, string> {
+  const userId = sessionStorage.getItem('externalUserId')
+  if (userId && GUID_REGEX.test(userId)) {
+    return { 'X-External-User-Id': userId }
+  }
+  return {}
+}
+
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
   const response = await fetch('/conversation', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     },
     body: JSON.stringify({
       messages: options.messages
@@ -37,7 +50,10 @@ export const fetchChatHistoryInit = (): Conversation[] | null => {
 
 export const historyList = async (offset = 0): Promise<Conversation[] | null> => {
   const response = await fetch(`/history/list?offset=${offset}`, {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getExternalUserHeaders()
+    }
   })
     .then(async res => {
       const payload = await res.json()
@@ -82,7 +98,8 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(async res => {
@@ -131,7 +148,8 @@ export const historyGenerate = async (
   const response = await fetch('/history/generate', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     },
     body: body,
     signal: abortSignal
@@ -154,7 +172,8 @@ export const historyUpdate = async (messages: ChatMessage[], convId: string): Pr
       messages: messages
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(async res => {
@@ -179,7 +198,8 @@ export const historyDelete = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(res => {
@@ -202,7 +222,8 @@ export const historyDeleteAll = async (): Promise<Response> => {
     method: 'DELETE',
     body: JSON.stringify({}),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(res => {
@@ -227,7 +248,8 @@ export const historyClear = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(res => {
@@ -253,7 +275,8 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
       title: title
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(res => {
@@ -273,7 +296,10 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
 
 export const historyEnsure = async (): Promise<CosmosDBHealth> => {
   const response = await fetch('/history/ensure', {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getExternalUserHeaders()
+    }
   })
     .then(async res => {
       const respJson = await res.json()
@@ -335,7 +361,8 @@ export const historyMessageFeedback = async (messageId: string, feedback: string
       message_feedback: feedback
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeaders()
     }
   })
     .then(res => {
