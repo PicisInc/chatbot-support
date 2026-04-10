@@ -2,11 +2,19 @@ import { chatHistorySampleData } from '../constants/chatHistory'
 
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
+function getExternalUserHeader(): Record<string, string> {
+  const params = new URLSearchParams(window.location.search)
+  const userId = params.get('user') ?? ''
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(userId) ? { 'X-Ms-Client-Principal-Id': userId } : {}
+}
+
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
   const response = await fetch('/conversation', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     },
     body: JSON.stringify({
       messages: options.messages
@@ -37,7 +45,8 @@ export const fetchChatHistoryInit = (): Conversation[] | null => {
 
 export const historyList = async (offset = 0): Promise<Conversation[] | null> => {
   const response = await fetch(`/history/list?offset=${offset}`, {
-    method: 'GET'
+    method: 'GET',
+    headers: { ...getExternalUserHeader() }
   })
     .then(async res => {
       const payload = await res.json()
@@ -82,7 +91,8 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     }
   })
     .then(async res => {
@@ -131,7 +141,8 @@ export const historyGenerate = async (
   const response = await fetch('/history/generate', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     },
     body: body,
     signal: abortSignal
@@ -154,7 +165,8 @@ export const historyUpdate = async (messages: ChatMessage[], convId: string): Pr
       messages: messages
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     }
   })
     .then(async res => {
@@ -179,7 +191,8 @@ export const historyDelete = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     }
   })
     .then(res => {
@@ -202,7 +215,8 @@ export const historyDeleteAll = async (): Promise<Response> => {
     method: 'DELETE',
     body: JSON.stringify({}),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     }
   })
     .then(res => {
@@ -227,7 +241,8 @@ export const historyClear = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     }
   })
     .then(res => {
@@ -253,7 +268,8 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
       title: title
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getExternalUserHeader()
     }
   })
     .then(res => {
