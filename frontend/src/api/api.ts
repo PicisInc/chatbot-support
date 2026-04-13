@@ -3,10 +3,10 @@ import { chatHistorySampleData } from '../constants/chatHistory'
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
 function getExternalUserHeader(): Record<string, string> {
-  const params = new URLSearchParams(window.location.search)
+  const params = new URLSearchParams(globalThis.location.search)
   const userId = params.get('user') ?? ''
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  return uuidRegex.test(userId) ? { 'X-Ms-Client-Principal-Id': userId } : {}
+  return uuidRegex.test(userId) ? { 'X-External-User-Id': userId } : {}
 }
 
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
