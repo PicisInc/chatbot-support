@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { initializeIcons } from '@fluentui/react'
 
 import Chat from './pages/chat/Chat'
@@ -15,14 +15,14 @@ initializeIcons("https://res.cdn.office.net/files/fabric-cdn-prod_20241209.001/a
 export default function App() {
   return (
     <AppStateProvider>
-      <HashRouter>
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Chat />} />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </AppStateProvider>
   )
 }

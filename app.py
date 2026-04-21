@@ -78,6 +78,17 @@ async def assets(path):
     return await send_from_directory("static/assets", path)
 
 
+# Catch-all: serve index.html for any path not matched by an API route.
+# Required for BrowserRouter SPA navigation (e.g. direct links / page refresh).
+@bp.route("/<path:path>")
+async def catch_all(path):
+    return await render_template(
+        "index.html",
+        title=app_settings.ui.title,
+        favicon=app_settings.ui.favicon
+    )
+
+
 # Debug settings
 DEBUG = os.environ.get("DEBUG", "false")
 if DEBUG.lower() == "true":

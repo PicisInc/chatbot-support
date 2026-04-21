@@ -8,11 +8,24 @@ import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosD
 const _URL_USER_PARAM_KEY = 'url_user_id'
 const _GUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
-// Read ?user=GUID from the page URL (before the # hash used by HashRouter)
-// and store it in sessionStorage so it persists across SPA navigation.
+// Read ?user=GUID from the page URL and store it in sessionStorage so it
+// persists across SPA navigation. The parameter may appear either before the
+// hash (e.g. /?user=GUID#/) or inside the hash (e.g. /#/?user=GUID), so both
+// locations are checked.
 ;(function initUrlUserId() {
+  // Priority 1: query string before the hash (?user=GUID#/)
   const params = new URLSearchParams(globalThis.location.search)
-  const userParam = params.get('user')
+  let userParam = params.get('user')
+
+  // Priority 2: query string embedded in the hash (#/?user=GUID)
+  if (!userParam) {
+    const hash = globalThis.location.hash // e.g. "#/?user=GUID"
+    const qIndex = hash.indexOf('?')
+    if (qIndex !== -1) {
+      userParam = new URLSearchParams(hash.slice(qIndex)).get('user')
+    }
+  }
+
   if (userParam && _GUID_REGEX.test(userParam)) {
     sessionStorage.setItem(_URL_USER_PARAM_KEY, userParam)
   }
