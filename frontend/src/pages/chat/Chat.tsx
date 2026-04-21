@@ -24,6 +24,7 @@ import {
   AzureSqlServerExecResults,
   ChatResponse,
   getUserInfo,
+  getUrlUserId,
   Conversation,
   historyGenerate,
   historyUpdate,
@@ -118,6 +119,11 @@ const Chat = () => {
 
   const getUserInfoList = async () => {
     if (!AUTH_ENABLED) {
+      setShowAuthMessage(false)
+      return
+    }
+    // URL ?user=GUID parameter mode — treat as authenticated without Azure login
+    if (getUrlUserId()) {
       setShowAuthMessage(false)
       return
     }

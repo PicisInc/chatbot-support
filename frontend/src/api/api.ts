@@ -2,11 +2,39 @@ import { chatHistorySampleData } from '../constants/chatHistory'
 
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
+// ---------------------------------------------------------------------------
+// URL user parameter auth helpers
+// ---------------------------------------------------------------------------
+const _URL_USER_PARAM_KEY = 'url_user_id'
+const _GUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+
+// Read ?user=GUID from the page URL (before the # hash used by HashRouter)
+// and store it in sessionStorage so it persists across SPA navigation.
+;(function initUrlUserId() {
+  const params = new URLSearchParams(globalThis.location.search)
+  const userParam = params.get('user')
+  if (userParam && _GUID_REGEX.test(userParam)) {
+    sessionStorage.setItem(_URL_USER_PARAM_KEY, userParam)
+  }
+})()
+
+/** Returns the GUID from the ?user= URL param, or null if not present / invalid. */
+export function getUrlUserId(): string | null {
+  return sessionStorage.getItem(_URL_USER_PARAM_KEY)
+}
+
+/** Returns an object with the X-User-Id header when a URL user GUID is active, or empty. */
+function getUrlUserHeaders(): Record<string, string> {
+  const userId = getUrlUserId()
+  return userId ? { 'X-User-Id': userId } : {}
+}
+
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
   const response = await fetch('/conversation', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     },
     body: JSON.stringify({
       messages: options.messages
@@ -37,7 +65,10 @@ export const fetchChatHistoryInit = (): Conversation[] | null => {
 
 export const historyList = async (offset = 0): Promise<Conversation[] | null> => {
   const response = await fetch(`/history/list?offset=${offset}`, {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getUrlUserHeaders()
+    }
   })
     .then(async res => {
       const payload = await res.json()
@@ -82,7 +113,8 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(async res => {
@@ -131,7 +163,8 @@ export const historyGenerate = async (
   const response = await fetch('/history/generate', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     },
     body: body,
     signal: abortSignal
@@ -154,7 +187,8 @@ export const historyUpdate = async (messages: ChatMessage[], convId: string): Pr
       messages: messages
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(async res => {
@@ -179,7 +213,8 @@ export const historyDelete = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(res => {
@@ -202,7 +237,8 @@ export const historyDeleteAll = async (): Promise<Response> => {
     method: 'DELETE',
     body: JSON.stringify({}),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(res => {
@@ -227,7 +263,8 @@ export const historyClear = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(res => {
@@ -253,7 +290,8 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
       title: title
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(res => {
@@ -273,7 +311,10 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
 
 export const historyEnsure = async (): Promise<CosmosDBHealth> => {
   const response = await fetch('/history/ensure', {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getUrlUserHeaders()
+    }
   })
     .then(async res => {
       const respJson = await res.json()
@@ -335,7 +376,8 @@ export const historyMessageFeedback = async (messageId: string, feedback: string
       message_feedback: feedback
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUrlUserHeaders()
     }
   })
     .then(res => {
