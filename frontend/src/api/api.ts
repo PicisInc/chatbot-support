@@ -2,11 +2,18 @@ import { chatHistorySampleData } from '../constants/chatHistory'
 
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
+const getUserHeaders = (): Record<string, string> => {
+  const params = new URLSearchParams(window.location.search)
+  const user = params.get('user')
+  return user ? { 'X-Ms-Client-Principal-Id': user } : {}
+}
+
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
   const response = await fetch('/conversation', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     },
     body: JSON.stringify({
       messages: options.messages
@@ -37,7 +44,10 @@ export const fetchChatHistoryInit = (): Conversation[] | null => {
 
 export const historyList = async (offset = 0): Promise<Conversation[] | null> => {
   const response = await fetch(`/history/list?offset=${offset}`, {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getUserHeaders()
+    }
   })
     .then(async res => {
       const payload = await res.json()
@@ -82,7 +92,8 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(async res => {
@@ -131,7 +142,8 @@ export const historyGenerate = async (
   const response = await fetch('/history/generate', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     },
     body: body,
     signal: abortSignal
@@ -154,7 +166,8 @@ export const historyUpdate = async (messages: ChatMessage[], convId: string): Pr
       messages: messages
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(async res => {
@@ -179,7 +192,8 @@ export const historyDelete = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(res => {
@@ -202,7 +216,8 @@ export const historyDeleteAll = async (): Promise<Response> => {
     method: 'DELETE',
     body: JSON.stringify({}),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(res => {
@@ -227,7 +242,8 @@ export const historyClear = async (convId: string): Promise<Response> => {
       conversation_id: convId
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(res => {
@@ -253,7 +269,8 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
       title: title
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(res => {
@@ -273,7 +290,10 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
 
 export const historyEnsure = async (): Promise<CosmosDBHealth> => {
   const response = await fetch('/history/ensure', {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getUserHeaders()
+    }
   })
     .then(async res => {
       const respJson = await res.json()
@@ -315,7 +335,10 @@ export const historyEnsure = async (): Promise<CosmosDBHealth> => {
 
 export const frontendSettings = async (): Promise<Response | null> => {
   const response = await fetch('/frontend_settings', {
-    method: 'GET'
+    method: 'GET',
+    headers: {
+      ...getUserHeaders()
+    }
   })
     .then(res => {
       return res.json()
@@ -335,7 +358,8 @@ export const historyMessageFeedback = async (messageId: string, feedback: string
       message_feedback: feedback
     }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getUserHeaders()
     }
   })
     .then(res => {

@@ -4,7 +4,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text } from '@fluentui/react'
 import { useBoolean } from '@fluentui/react-hooks'
-import { ThumbDislike20Filled, ThumbLike20Filled } from '@fluentui/react-icons'
+import { ThumbDislike20Filled, ThumbDislike20Regular, ThumbLike20Filled, ThumbLike20Regular } from '@fluentui/react-icons'
 import DOMPurify from 'dompurify'
 import remarkGfm from 'remark-gfm'
 import supersub from 'remark-supersub'
@@ -38,7 +38,6 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen)
   const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer))
   const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false)
-  const [showReportInappropriateFeedback, setShowReportInappropriateFeedback] = useState(false)
   const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([])
   const appStateContext = useContext(AppStateContext)
   const FEEDBACK_ENABLED =
@@ -147,7 +146,6 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 
   const resetFeedbackDialog = () => {
     setIsFeedbackDialogOpen(false)
-    setShowReportInappropriateFeedback(false)
     setNegativeFeedbackList([])
   }
 
@@ -157,69 +155,29 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
         <div>Why wasn't this response helpful?</div>
         <Stack tokens={{ childrenGap: 4 }}>
           <Checkbox
-            label="Citations are missing"
-            id={Feedback.MissingCitation}
-            defaultChecked={negativeFeedbackList.includes(Feedback.MissingCitation)}
+            label="Incorrect answer"
+            id={Feedback.IncorrectAnswer}
+            defaultChecked={negativeFeedbackList.includes(Feedback.IncorrectAnswer)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
-            label="Citations are wrong"
-            id={Feedback.WrongCitation}
-            defaultChecked={negativeFeedbackList.includes(Feedback.WrongCitation)}
+            label="Missing answer"
+            id={Feedback.MissingAnswer}
+            defaultChecked={negativeFeedbackList.includes(Feedback.MissingAnswer)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
-            label="The response is not from my data"
-            id={Feedback.OutOfScope}
-            defaultChecked={negativeFeedbackList.includes(Feedback.OutOfScope)}
+            label="Too confusing"
+            id={Feedback.TooConfusing}
+            defaultChecked={negativeFeedbackList.includes(Feedback.TooConfusing)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
-            label="Inaccurate or irrelevant"
-            id={Feedback.InaccurateOrIrrelevant}
-            defaultChecked={negativeFeedbackList.includes(Feedback.InaccurateOrIrrelevant)}
-            onChange={updateFeedbackList}></Checkbox>
-          <Checkbox
-            label="Other"
-            id={Feedback.OtherUnhelpful}
-            defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)}
-            onChange={updateFeedbackList}></Checkbox>
-        </Stack>
-        <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
-          Report inappropriate content
-        </div>
-      </>
-    )
-  }
-
-  const ReportInappropriateFeedbackContent = () => {
-    return (
-      <>
-        <div>
-          The content is <span style={{ color: 'red' }}>*</span>
-        </div>
-        <Stack tokens={{ childrenGap: 4 }}>
-          <Checkbox
-            label="Hate speech, stereotyping, demeaning"
-            id={Feedback.HateSpeech}
-            defaultChecked={negativeFeedbackList.includes(Feedback.HateSpeech)}
-            onChange={updateFeedbackList}></Checkbox>
-          <Checkbox
-            label="Violent: glorification of violence, self-harm"
-            id={Feedback.Violent}
-            defaultChecked={negativeFeedbackList.includes(Feedback.Violent)}
-            onChange={updateFeedbackList}></Checkbox>
-          <Checkbox
-            label="Sexual: explicit content, grooming"
-            id={Feedback.Sexual}
-            defaultChecked={negativeFeedbackList.includes(Feedback.Sexual)}
-            onChange={updateFeedbackList}></Checkbox>
-          <Checkbox
-            label="Manipulative: devious, emotional, pushy, bullying"
-            defaultChecked={negativeFeedbackList.includes(Feedback.Manipulative)}
-            id={Feedback.Manipulative}
+            label="Technical problem"
+            id={Feedback.TechnicalProblem}
+            defaultChecked={negativeFeedbackList.includes(Feedback.TechnicalProblem)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
             label="Other"
-            id={Feedback.OtherHarmful}
-            defaultChecked={negativeFeedbackList.includes(Feedback.OtherHarmful)}
+            id={Feedback.Other}
+            defaultChecked={negativeFeedbackList.includes(Feedback.Other)}
             onChange={updateFeedbackList}></Checkbox>
         </Stack>
       </>
@@ -262,29 +220,37 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             <Stack.Item className={styles.answerHeader}>
               {FEEDBACK_ENABLED && answer.message_id !== undefined && (
                 <Stack horizontal horizontalAlign="space-between">
-                  <ThumbLike20Filled
-                    aria-hidden="false"
-                    aria-label="Like this response"
-                    onClick={() => onLikeResponseClicked()}
-                    style={
-                      feedbackState === Feedback.Positive ||
-                        appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive
-                        ? { color: 'darkgreen', cursor: 'pointer' }
-                        : { color: 'slategray', cursor: 'pointer' }
-                    }
-                  />
-                  <ThumbDislike20Filled
-                    aria-hidden="false"
-                    aria-label="Dislike this response"
-                    onClick={() => onDislikeResponseClicked()}
-                    style={
-                      feedbackState !== Feedback.Positive &&
-                        feedbackState !== Feedback.Neutral &&
-                        feedbackState !== undefined
-                        ? { color: 'darkred', cursor: 'pointer' }
-                        : { color: 'slategray', cursor: 'pointer' }
-                    }
-                  />
+                  {feedbackState === Feedback.Positive ||
+                  appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive
+                    ? <ThumbLike20Filled
+                        aria-hidden="false"
+                        aria-label="Like this response"
+                        onClick={() => onLikeResponseClicked()}
+                        style={{ color: 'var(--picis-blue-600)', cursor: 'pointer' }}
+                      />
+                    : <ThumbLike20Regular
+                        aria-hidden="false"
+                        aria-label="Like this response"
+                        onClick={() => onLikeResponseClicked()}
+                        style={{ color: 'var(--picis-blue-600)', cursor: 'pointer' }}
+                      />
+                  }
+                  {feedbackState !== Feedback.Positive &&
+                  feedbackState !== Feedback.Neutral &&
+                  feedbackState !== undefined
+                    ? <ThumbDislike20Filled
+                        aria-hidden="false"
+                        aria-label="Dislike this response"
+                        onClick={() => onDislikeResponseClicked()}
+                        style={{ color: 'var(--picis-blue-600)', cursor: 'pointer' }}
+                      />
+                    : <ThumbDislike20Regular
+                        aria-hidden="false"
+                        aria-label="Dislike this response"
+                        onClick={() => onDislikeResponseClicked()}
+                        style={{ color: 'var(--picis-blue-600)', cursor: 'pointer' }}
+                      />
+                  }
                 </Stack>
               )}
             </Stack.Item>
@@ -400,7 +366,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
         <Stack tokens={{ childrenGap: 4 }}>
           <div>Your feedback will improve this experience.</div>
 
-          {!showReportInappropriateFeedback ? <UnhelpfulFeedbackContent /> : <ReportInappropriateFeedbackContent />}
+          <UnhelpfulFeedbackContent />
 
           <div>By pressing submit, your feedback will be visible to the application owner.</div>
 
