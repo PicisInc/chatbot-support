@@ -117,6 +117,11 @@ const Chat = () => {
   }, [appStateContext?.state.chatHistoryLoadingState])
 
   const getUserInfoList = async () => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('user')) {
+      setShowAuthMessage(false)
+      return
+    }
     if (!AUTH_ENABLED) {
       setShowAuthMessage(false)
       return
