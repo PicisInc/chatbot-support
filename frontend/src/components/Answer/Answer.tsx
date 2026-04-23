@@ -226,13 +226,13 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
                         aria-hidden="false"
                         aria-label="Like this response"
                         onClick={() => onLikeResponseClicked()}
-                        style={{ color: '#0078D4', cursor: 'pointer' }}
+                        style={{ color: 'var(--picis-blue-500)', cursor: 'pointer' }}
                       />
                     : <ThumbLike20Regular
                         aria-hidden="false"
                         aria-label="Like this response"
                         onClick={() => onLikeResponseClicked()}
-                        style={{ color: '#0078D4', cursor: 'pointer' }}
+                        style={{ color: 'var(--picis-blue-500)', cursor: 'pointer' }}
                       />
                   }
                   {feedbackState !== Feedback.Positive &&
@@ -242,13 +242,13 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
                         aria-hidden="false"
                         aria-label="Dislike this response"
                         onClick={() => onDislikeResponseClicked()}
-                        style={{ color: '#0078D4', cursor: 'pointer' }}
+                        style={{ color: 'var(--picis-blue-500)', cursor: 'pointer' }}
                       />
                     : <ThumbDislike20Regular
                         aria-hidden="false"
                         aria-label="Dislike this response"
                         onClick={() => onDislikeResponseClicked()}
-                        style={{ color: '#0078D4', cursor: 'pointer' }}
+                        style={{ color: 'var(--picis-blue-500)', cursor: 'pointer' }}
                       />
                   }
                 </Stack>
